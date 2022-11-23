@@ -18,7 +18,7 @@ function elt (type, attrs, ...children) {
 function changeByInterval() {
     let randomColor = Math.floor(Math.random() * (COLOR.length + 1));
     let randomState = Math.floor(Math.random() * COLUMNS * ROWS);
-    let y = randomState == 0 ? 0 : Math.trunc(randomState / ROWS)
+    let y = Math.trunc(randomState / ROWS)
     let x = (randomState % ROWS)
 
     let color = randomColor < 2 ? COLOR[randomColor][0] : '';
