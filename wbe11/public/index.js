@@ -43,10 +43,6 @@ function init() {
     })
 }
 
-function initializeField() {
-
-}
-
 function handleClick(event) {
     const lastIndex = getLastEmptyIndexOfColumn(event.currentTarget.index)
     if(state.winner >= 0 || lastIndex < 0) return;
