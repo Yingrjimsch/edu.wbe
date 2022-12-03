@@ -1,5 +1,3 @@
-import { COLUMNS, EMPTY_STRING, ROWS } from "./gameConfig.js";
-
 const spaceBetweenSubArrays = (arr) => arr.map(subArray => subArray.concat(EMPTY_STRING));
 const transform = (arr) => arr[0].map((_, j) => arr.map(row => row[j]));
 const stringify = (...arrays) => Array.from(arrays).join(',')
@@ -21,7 +19,7 @@ const getDiagonals = (arr) => arr.reduce((accumulator, currentValue, i) => {
       return accumulator;
     }, []).filter(arr => arr.length >= 4);
 
-export function connect4Winner(player, board) {
+function connect4Winner(player, board) {
     let boardCopy = Array.from(board);
     const newArr = [];
     while(boardCopy.length) newArr.push(boardCopy.splice(0, COLUMNS));

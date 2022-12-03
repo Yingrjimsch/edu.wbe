@@ -1,6 +1,3 @@
-import { connect4Winner } from "./connect4-winner.js";
-import { COLOR, ROWS, COLUMNS, EMPTY_STRING } from './gameConfig.js'
-
 // Server Configurations
 const SERVER_URL = 'http://localhost:3000/api/data/state?api-key=c4game';
 
@@ -76,17 +73,11 @@ function overwritePiecesWithBoard() {
 }
 
 function saveState() {
-    fetch(SERVER_URL, {
-        method: 'PUT',
-        headers: { 'Content-type': 'application/json' },
-        body: JSON.stringify(state)
-    });
+    localStorage.setItem('state', JSON.stringify(state));
 }
 
 function getState() {
-    fetch(SERVER_URL)
-        .then(response => response.json()) 
-        .then((data) => loadGame(data));
+    loadGame(JSON.parse(localStorage.getItem('state')))
 }
 
 window.addEventListener("DOMContentLoaded", function() {

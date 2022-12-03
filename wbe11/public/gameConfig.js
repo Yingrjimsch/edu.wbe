@@ -1,4 +1,4 @@
-export const COLOR = ['blue', 'red'];
-export const ROWS = 6;
-export const COLUMNS = 7; 
-export const EMPTY_STRING = '';
+const COLOR = ['blue', 'red'];
+const ROWS = 6;
+const COLUMNS = 7; 
+const EMPTY_STRING = '';
