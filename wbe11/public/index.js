@@ -1,7 +1,3 @@
-// Server Configurations
-const SERVER_URL = 'http://localhost:3000/api/data/state?api-key=c4game';
-
-//let playerOnTurn = 0;
 let states = []
 let state = {board: Array(COLUMNS * ROWS).fill(EMPTY_STRING), playerOnTurn: 0, winner: -1, clickedChild: undefined}; 
 
@@ -44,20 +40,22 @@ function init() {
 
 function handleClick(event) {
     const lastIndex = getLastEmptyIndexOfColumn(event.currentTarget.index);
-    state.clickedChild = lastIndex;
-    states.push(JSON.parse(JSON.stringify(state)));
     if(state.winner >= 0 || lastIndex < 0) return;
-    state.board[lastIndex] = COLOR[state.playerOnTurn];
+    changeState(lastIndex);
     event.currentTarget.board.classList.replace(COLOR[state.playerOnTurn] + '-pulse', COLOR[state.playerOnTurn^1] + '-pulse')
     event.currentTarget.board.children.item(lastIndex).children.item(0).classList.add(COLOR[state.playerOnTurn]);
     if(connect4Winner(COLOR[state.playerOnTurn], state.board)) {
-        showPopup('WINNER IS: ' + COLOR[state.playerOnTurn], false);
-        console.log('WINNER IS:', COLOR[state.playerOnTurn]);
+        showPopup(WINNER_TEXT + COLOR[state.playerOnTurn], false);
         state.winner = state.playerOnTurn;
         return;
     }
     state.playerOnTurn ^= 1;
-    console.log('New player on turn:', COLOR[state.playerOnTurn]);
+}
+
+function changeState(lastIndex) {
+    state.clickedChild = lastIndex;
+    states.push(JSON.parse(JSON.stringify(state)));
+    state.board[lastIndex] = COLOR[state.playerOnTurn];
 }
 
 function newGame() {
