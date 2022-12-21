@@ -2,7 +2,8 @@
 const SERVER_URL = 'http://localhost:3000/api/data/state?api-key=c4game';
 
 //let playerOnTurn = 0;
-let state = {board: Array(COLUMNS * ROWS).fill(EMPTY_STRING), playerOnTurn: 0, winner: -1}; 
+let states = []
+let state = {board: Array(COLUMNS * ROWS).fill(EMPTY_STRING), playerOnTurn: 0, winner: -1, clickedChild: undefined}; 
 
 function elt (type, attrs) {
     let node = document.createElement(type)
@@ -25,6 +26,7 @@ function setButtonListeners() {
     document.getElementById('start-btn').addEventListener('click', newGame);
     document.getElementById('load-btn').addEventListener('click', getState);
     document.getElementById('save-btn').addEventListener('click', saveState);
+    document.getElementById('undo-btn').addEventListener('click', undoState);
 }
 
 function init() {
@@ -35,17 +37,21 @@ function init() {
         chip.index = i;
         chip.board = board;
         let square = elt('div', {class: 'field'});
-        square.appendChild(chip)
-        board.appendChild(square)
+        square.appendChild(chip);
+        board.appendChild(square);
     })
 }
 
 function handleClick(event) {
-    const lastIndex = getLastEmptyIndexOfColumn(event.currentTarget.index)
+    const lastIndex = getLastEmptyIndexOfColumn(event.currentTarget.index);
+    state.clickedChild = lastIndex;
+    states.push(JSON.parse(JSON.stringify(state)));
     if(state.winner >= 0 || lastIndex < 0) return;
     state.board[lastIndex] = COLOR[state.playerOnTurn];
-    event.currentTarget.board.children.item(lastIndex).children.item(0).classList.add(COLOR[state.playerOnTurn])
+    event.currentTarget.board.classList.replace(COLOR[state.playerOnTurn] + '-pulse', COLOR[state.playerOnTurn^1] + '-pulse')
+    event.currentTarget.board.children.item(lastIndex).children.item(0).classList.add(COLOR[state.playerOnTurn]);
     if(connect4Winner(COLOR[state.playerOnTurn], state.board)) {
+        showPopup('WINNER IS: ' + COLOR[state.playerOnTurn], false);
         console.log('WINNER IS:', COLOR[state.playerOnTurn]);
         state.winner = state.playerOnTurn;
         return;
@@ -77,7 +83,33 @@ function saveState() {
 }
 
 function getState() {
-    loadGame(JSON.parse(localStorage.getItem('state')))
+    tempState = localStorage.getItem('state');
+    if(!tempState) {
+        showPopup(LOAD_ERROR);
+        return;
+    }
+    loadGame(JSON.parse(tempState))
+}
+
+function undoState() {
+    if (states.length <= 0) {
+        showPopup(UNDO_ERROR);
+        return;
+    }
+    state = states.pop();
+    document.querySelector('.board').children.item(state.clickedChild).children.item(0).classList.remove(COLOR[state.playerOnTurn])
+}
+
+function showPopup(text, error=true) {
+    popup = document.getElementById('popup');
+    popup.querySelector('p').innerText = text;
+    popup.querySelector('img').src = error ? 
+        ERROR_GIFS[Math.floor(Math.random() * ERROR_GIFS.length)] :
+        WINNER_GIFS[Math.floor(Math.random() * WINNER_GIFS.length)];
+    popup.classList.replace('hidden-popup', 'visible-popup');
+    setTimeout(function() {
+        popup.classList.replace('visible-popup', 'hidden-popup');
+    }, 3000)
 }
 
 window.addEventListener("DOMContentLoaded", function() {
