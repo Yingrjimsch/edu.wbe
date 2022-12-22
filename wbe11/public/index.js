@@ -1,5 +1,6 @@
-let states = []
+
 let state = {board: Array(COLUMNS * ROWS).fill(EMPTY_STRING), playerOnTurn: 0, winner: -1, clickedChild: undefined}; 
+let states = Array(JSON.parse(JSON.stringify(state)));
 
 function elt (type, attrs) {
     let node = document.createElement(type)
@@ -40,9 +41,12 @@ function init() {
 
 function handleClick(event) {
     const lastIndex = getLastEmptyIndexOfColumn(event.currentTarget.index);
-    if(state.winner >= 0 || lastIndex < 0) return;
+    if(state.winner >= 0 || lastIndex < 0) {
+        showPopup(WRONG_TURN_ERROR)
+        return;
+    };
     changeState(lastIndex);
-    event.currentTarget.board.classList.replace(COLOR[state.playerOnTurn] + '-pulse', COLOR[state.playerOnTurn^1] + '-pulse')
+    event.currentTarget.board.classList.replace(COLOR[state.playerOnTurn] + PULSE_SUFFIX, COLOR[state.playerOnTurn^1] + PULSE_SUFFIX)
     event.currentTarget.board.children.item(lastIndex).children.item(0).classList.add(COLOR[state.playerOnTurn]);
     if(connect4Winner(COLOR[state.playerOnTurn], state.board)) {
         showPopup(WINNER_TEXT + COLOR[state.playerOnTurn], false);
@@ -50,11 +54,11 @@ function handleClick(event) {
         return;
     }
     state.playerOnTurn ^= 1;
+    states.push(JSON.parse(JSON.stringify(state)));
 }
 
 function changeState(lastIndex) {
     state.clickedChild = lastIndex;
-    states.push(JSON.parse(JSON.stringify(state)));
     state.board[lastIndex] = COLOR[state.playerOnTurn];
 }
 
@@ -77,25 +81,27 @@ function overwritePiecesWithBoard() {
 }
 
 function saveState() {
-    localStorage.setItem('state', JSON.stringify(state));
+    localStorage.setItem('states', JSON.stringify(states));
 }
 
 function getState() {
-    tempState = localStorage.getItem('state');
-    if(!tempState) {
+    tempStates = localStorage.getItem('states');
+    if(!tempStates) {
         showPopup(LOAD_ERROR);
         return;
     }
-    loadGame(JSON.parse(tempState))
+    states = JSON.parse(tempStates)
+    loadGame(states.at(-1))
 }
 
 function undoState() {
-    if (states.length <= 0) {
+    if (states.length <= 1) {
         showPopup(UNDO_ERROR);
         return;
     }
-    state = states.pop();
-    document.querySelector('.board').children.item(state.clickedChild).children.item(0).classList.remove(COLOR[state.playerOnTurn])
+    states.pop();
+    state = states.at(-1);
+    overwritePiecesWithBoard();
 }
 
 function showPopup(text, error=true) {
@@ -107,7 +113,7 @@ function showPopup(text, error=true) {
     popup.classList.replace('hidden-popup', 'visible-popup');
     setTimeout(function() {
         popup.classList.replace('visible-popup', 'hidden-popup');
-    }, 3000)
+    }, 4000)
 }
 
 window.addEventListener("DOMContentLoaded", function() {
